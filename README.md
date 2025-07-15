@@ -26,11 +26,19 @@ A powerful CLI tool that automatically generates GraphQL query and mutation file
 
 ## Installation
 
+### Global Installation
+
 ```bash
 npm install -g graphql-recursive-query-gen
 ```
 
-Or use it directly with npx:
+### Local Installation
+
+```bash
+npm install graphql-recursive-query-gen
+```
+
+### Using npx (without installation)
 
 ```bash
 npx graphql-recursive-query-gen <outputDir> <schemaPath> <withFragment> [namePostfix]
@@ -41,7 +49,16 @@ npx graphql-recursive-query-gen <outputDir> <schemaPath> <withFragment> [namePos
 ### Basic Command
 
 ```bash
+# With global installation
 gql-gen <outputDir> <schemaPath> <withFragment> [namePostfix]
+
+# With local installation
+npx gql-gen <outputDir> <schemaPath> <withFragment> [namePostfix]
+
+# Using package.json scripts
+"scripts": {
+  "generate": "gql-gen ./generated ./schema.graphqls true"
+}
 ```
 
 ### Parameters
@@ -142,29 +159,52 @@ This will create a simple schema, generate files, display the output, and clean 
 
 ## Examples
 
-#### Generate from a single schema file
+### Generate from a single schema file
 ```bash
 gql-gen ./generated ./schema.graphqls false
 ```
 
-#### Generate from a directory
+### Generate from a directory
 ```bash
 gql-gen ./generated ./schemas true
 ```
 
-#### Generate from a glob pattern
+### Generate from a glob pattern
 ```bash
 gql-gen ./generated "src/**/*.graphqls" true
 ```
 
-#### Generate from a remote endpoint
+### Generate from a remote endpoint
 ```bash
 gql-gen ./generated https://api.example.com/graphql false
 ```
 
-#### Generate with custom postfix
+### Generate with custom postfix
 ```bash
 gql-gen ./generated ./schema.graphqls true "V2"
+```
+
+### Using in npm scripts
+```json
+{
+  "scripts": {
+    "generate:graphql": "gql-gen ./src/graphql ./schemas/*.graphqls true",
+    "generate:graphql:prod": "gql-gen ./src/graphql https://api.production.com/graphql false PROD"
+  }
+}
+```
+
+### Programmatic usage with child_process
+```javascript
+const { exec } = require('child_process');
+
+exec('npx gql-gen ./output ./schema.graphqls true', (error, stdout, stderr) => {
+  if (error) {
+    console.error(`Error: ${error}`);
+    return;
+  }
+  console.log('GraphQL files generated successfully');
+});
 ```
 
 ## Output Structure

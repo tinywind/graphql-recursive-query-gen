@@ -1,0 +1,49 @@
+{
+  "name": "graphql-recursive-query-gen",
+  "version": "1.0.0",
+  "description": "A CLI tool that automatically generates GraphQL query/mutation files from GraphQL schemas",
+  "main": "generate-graphql-files.cjs",
+  "bin": {
+    "gql-gen": "./generate-graphql-files.cjs"
+  },
+  "files": [
+    "generate-graphql-files.cjs",
+    "README.md",
+    "LICENSE",
+    "examples/"
+  ],
+  "scripts": {
+    "test": "bash test-local.sh",
+    "test:quick": "node quick-test.js",
+    "test:basic": "node generate-graphql-files.cjs test-output/basic examples/sample-schema.graphqls false",
+    "test:fragments": "node generate-graphql-files.cjs test-output/fragments examples/sample-schema.graphqls true",
+    "test:postfix": "node generate-graphql-files.cjs test-output/postfix examples/sample-schema.graphqls true V2",
+    "prepublishOnly": "npm run test:quick"
+  },
+  "keywords": [
+    "graphql",
+    "query",
+    "mutation",
+    "generator",
+    "schema",
+    "cli"
+  ],
+  "author": "tinywind",
+  "license": "MIT",
+  "dependencies": {
+    "graphql": "^16.8.0",
+    "globby": "^14.1.0",
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tinywind/graphql-recursive-query-gen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tinywind/graphql-recursive-query-gen/issues"
+  },
+  "homepage": "https://github.com/tinywind/graphql-recursive-query-gen#readme"
+}

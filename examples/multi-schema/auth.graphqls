@@ -1,0 +1,16 @@
+extend type Query {
+  me: User
+  validateToken(token: String!): Boolean!
+}
+
+extend type Mutation {
+  login(email: String!, password: String!): AuthPayload!
+  logout: Boolean!
+  refreshToken(refreshToken: String!): AuthPayload!
+}
+
+type AuthPayload {
+  user: User!
+  token: String!
+  refreshToken: String!
+}

@@ -1,0 +1,28 @@
+# Development files
+.gitignore
+.eslintrc
+.prettierrc
+.github/
+test/
+docs/
+.editorconfig
+PUBLISH_CHECKLIST.md
+CHANGELOG.md
+
+# Test files and output
+test-local.sh
+quick-test.js
+test-output/
+quick-test-output/
+
+# Generated files
+generated/
+*.log
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

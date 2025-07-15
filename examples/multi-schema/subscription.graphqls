@@ -1,0 +1,5 @@
+type Subscription {
+  postAdded(userId: ID): Post!
+  commentAdded(postId: ID!): Comment!
+  userStatusChanged(userId: ID!): User!
+}

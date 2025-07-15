@@ -1,0 +1,262 @@
+# E-commerce Example Schema
+# This schema demonstrates various GraphQL features
+
+scalar DateTime
+scalar Decimal
+scalar JSON
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  PAYPAL
+  BANK_TRANSFER
+}
+
+type Query {
+  # Product queries
+  product(id: ID!): Product
+  products(
+    filter: ProductFilter
+    sort: ProductSort
+    limit: Int = 10
+    offset: Int = 0
+  ): ProductConnection!
+
+  # Category queries
+  category(id: ID!): Category
+  categories: [Category!]!
+
+  # Order queries
+  order(id: ID!): Order
+  myOrders(status: OrderStatus): [Order!]!
+
+  # Cart query
+  myCart: Cart
+
+  # Search
+  search(query: String!, type: SearchType): SearchResult!
+}
+
+type Mutation {
+  # Product management (admin only)
+  createProduct(input: CreateProductInput!): Product!
+  updateProduct(id: ID!, input: UpdateProductInput!): Product!
+  deleteProduct(id: ID!): Boolean!
+
+  # Cart operations
+  addToCart(productId: ID!, quantity: Int!): Cart!
+  updateCartItem(itemId: ID!, quantity: Int!): Cart!
+  removeFromCart(itemId: ID!): Cart!
+  clearCart: Cart!
+
+  # Order operations
+  checkout(input: CheckoutInput!): Order!
+  cancelOrder(orderId: ID!): Order!
+
+  # Review operations
+  addReview(productId: ID!, input: ReviewInput!): Review!
+}
+
+type Product {
+  id: ID!
+  name: String!
+  description: String!
+  price: Decimal!
+  compareAtPrice: Decimal
+  sku: String!
+  inventory: Int!
+  images: [ProductImage!]!
+  category: Category!
+  reviews: [Review!]!
+  averageRating: Float
+  tags: [String!]!
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ProductImage {
+  id: ID!
+  url: String!
+  altText: String
+  width: Int!
+  height: Int!
+}
+
+type Category {
+  id: ID!
+  name: String!
+  slug: String!
+  description: String
+  parent: Category
+  children: [Category!]!
+  products(limit: Int, offset: Int): [Product!]!
+}
+
+type Cart {
+  id: ID!
+  items: [CartItem!]!
+  subtotal: Decimal!
+  tax: Decimal!
+  total: Decimal!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type CartItem {
+  id: ID!
+  product: Product!
+  quantity: Int!
+  price: Decimal!
+  total: Decimal!
+}
+
+type Order {
+  id: ID!
+  orderNumber: String!
+  items: [OrderItem!]!
+  status: OrderStatus!
+  subtotal: Decimal!
+  tax: Decimal!
+  shipping: Decimal!
+  total: Decimal!
+  shippingAddress: Address!
+  billingAddress: Address!
+  paymentMethod: PaymentMethod!
+  trackingNumber: String
+  notes: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type OrderItem {
+  id: ID!
+  product: Product!
+  quantity: Int!
+  price: Decimal!
+  total: Decimal!
+}
+
+type Address {
+  street: String!
+  city: String!
+  state: String!
+  postalCode: String!
+  country: String!
+}
+
+type Review {
+  id: ID!
+  product: Product!
+  rating: Int!
+  title: String
+  comment: String
+  author: String!
+  createdAt: DateTime!
+}
+
+# Connections for pagination
+type ProductConnection {
+  edges: [ProductEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ProductEdge {
+  node: Product!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+# Search
+union SearchResult = Product | Category
+
+enum SearchType {
+  PRODUCT
+  CATEGORY
+  ALL
+}
+
+# Input types
+input ProductFilter {
+  categoryId: ID
+  minPrice: Decimal
+  maxPrice: Decimal
+  inStock: Boolean
+  tags: [String!]
+}
+
+input ProductSort {
+  field: ProductSortField!
+  order: SortOrder!
+}
+
+enum ProductSortField {
+  NAME
+  PRICE
+  CREATED_AT
+  RATING
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+input CreateProductInput {
+  name: String!
+  description: String!
+  price: Decimal!
+  compareAtPrice: Decimal
+  sku: String!
+  inventory: Int!
+  categoryId: ID!
+  tags: [String!]
+  metadata: JSON
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  price: Decimal
+  compareAtPrice: Decimal
+  inventory: Int
+  categoryId: ID
+  tags: [String!]
+  metadata: JSON
+}
+
+input CheckoutInput {
+  paymentMethod: PaymentMethod!
+  shippingAddress: AddressInput!
+  billingAddress: AddressInput!
+  notes: String
+}
+
+input AddressInput {
+  street: String!
+  city: String!
+  state: String!
+  postalCode: String!
+  country: String!
+}
+
+input ReviewInput {
+  rating: Int!
+  title: String
+  comment: String
+}

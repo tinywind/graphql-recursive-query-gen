@@ -142,27 +142,33 @@ async function main() {
     return result;
   };
 
-  const getReturnTypes = (TYPES, typeRef, typePath = []) => {
-    const objectType = TYPES[typeRef];
-    if (!objectType) return '';
-    if (typePath.includes(typeRef)) return '';
+  const getReturnTypes = (TYPES, typeRef, paths, maxDepth = 5) => {
+    if (paths.length >= maxDepth) return '';
 
-    const intents = repeatedIntent(typePath.length + 2);
-    return objectType
-      .map(field => {
-        if (!TYPES[field.ref]) return `${intents}${field.name}`;
-        if (typePath.includes(field.ref)) return `${intents}${field.name}`;
-        const newTypePath = [...typePath, typeRef];
-        const subFields = getReturnTypes(TYPES, field.ref, newTypePath);
-        return subFields
-          ? `${intents}${field.name} {\n${subFields}\n${intents}}`
-          : `${intents}${field.name}`;
-      })
-      .filter(field => field !== '')
-      .join('\n');
+    const objectType = TYPES[typeRef];
+    const intents = repeatedIntent(paths.length + 2);
+
+    if (objectType) {
+      return objectType
+        .map(field => {
+          if (paths.find(path => path.name === field.name && path.ref === field.ref)) return '';
+
+          if (TYPES[field.ref]) {
+            const nestedContent = getReturnTypes(TYPES, field.ref, [...paths, { name: field.name, ref: field.ref }], maxDepth);
+            if (!nestedContent || nestedContent.trim() === '') return '';
+
+            return `${intents}${field.name} {\n${nestedContent}\n${intents}}`;
+          } else {
+            return `${intents}${field.name}`;
+          }
+        })
+        .filter(fieldStr => fieldStr !== '') // Remove empty entries
+        .join('\n');
+    }
+    return '';
   };
 
-  const generateGraphQLFile = schema => {
+  const generateGraphQLFile = (schema, maxDepth) => {
     const types = {};
     const definitions = parse(schema).definitions;
 
@@ -192,15 +198,20 @@ async function main() {
         def.fields.map(field => {
           const operationName = def.name.value;
           const fieldName = field.name.value;
+
+          let fieldContent = '';
+          if (types[findObjectType(field.type)]) {
+            if (withFragment) {
+              fieldContent = `{ ...${findObjectType(field.type)}${namePostfix}Fragment }`;
+            } else {
+              const returnContent = getReturnTypes(types, findObjectType(field.type), [], maxDepth);
+              fieldContent = returnContent && returnContent.trim() ? `{\n${returnContent}\n${intent}}` : '';
+            }
+          }
+
           const content = `${operationName.toLowerCase()} ${capitalize(fieldName)}${namePostfix}${
             field.arguments && field.arguments.length ? `(\n${variableDefinitions(field)}\n)` : ''
-          } {\n${intent}${fieldName}${field.arguments && field.arguments.length ? `(\n${fieldArgs(field)}\n${intent})` : ''} ${
-            !types[findObjectType(field.type)]
-              ? ''
-              : withFragment
-                ? `{ ...${findObjectType(field.type)}${namePostfix}Fragment }`
-                : `{\n${getReturnTypes(types, findObjectType(field.type), [])}\n${intent}}`
-          }\n}\n`;
+          } {\n${intent}${fieldName}${field.arguments && field.arguments.length ? `(\n${fieldArgs(field)}\n${intent})` : ''} ${fieldContent}\n}\n`;
           fs.writeFileSync(`${outputDir}/${capitalize(fieldName)}-${operationName.toLowerCase()}.graphql`, content, 'utf-8');
         });
       });
@@ -315,7 +326,7 @@ async function main() {
       const mergedSchema = print(mergedDocument);
 
       // Generate GraphQL files from merged schema
-      generateGraphQLFile(mergedSchema);
+      generateGraphQLFile(mergedSchema, maxDepth);
 
       console.log('GraphQL files generated successfully!');
     } catch (error) {
@@ -324,7 +335,7 @@ async function main() {
   };
 
   if (process.argv.length < 4) {
-    console.error('Usage: node generate-graphql-files.cjs <outputDir> <schemaPathPattern> <withFragment:[true|false]> <namePostfix(optional)>');
+    console.error('Usage: node generate-graphql-files.cjs <outputDir> <schemaPathPattern> <withFragment:[true|false]> <namePostfix(optional)> <maxDepth(optional):default=5>');
     console.error('  schemaPathPattern can be:');
     console.error('    - A single .graphqls file path');
     console.error('    - A directory containing .graphqls files');
@@ -337,6 +348,7 @@ async function main() {
   const schemaPath = process.argv[3];
   const withFragment = process.argv[4] === 'true'; // note: 순한 참조가 있다면, `false`로 설정해야 함
   const namePostfix = process.argv[5] || '';
+  const maxDepth = parseInt(process.argv[6]) || 5;
   const intent = '  ';
 
   try {

@@ -1,6 +1,6 @@
 {
   "name": "graphql-recursive-query-gen",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A CLI tool that automatically generates GraphQL query/mutation files from GraphQL schemas",
   "main": "generate-graphql-files.cjs",
   "bin": {

@@ -41,7 +41,7 @@ npm install graphql-recursive-query-gen
 ### Using npx (without installation)
 
 ```bash
-npx graphql-recursive-query-gen <outputDir> <schemaPath> <withFragment> [namePostfix]
+npx graphql-recursive-query-gen <outputDir> <schemaPath> <withFragment> [namePostfix] [maxDepth]
 ```
 
 ## Usage
@@ -50,10 +50,10 @@ npx graphql-recursive-query-gen <outputDir> <schemaPath> <withFragment> [namePos
 
 ```bash
 # With global installation
-gql-gen <outputDir> <schemaPath> <withFragment> [namePostfix]
+gql-gen <outputDir> <schemaPath> <withFragment> [namePostfix] [maxDepth]
 
 # With local installation
-npx gql-gen <outputDir> <schemaPath> <withFragment> [namePostfix]
+npx gql-gen <outputDir> <schemaPath> <withFragment> [namePostfix] [maxDepth]
 
 # Using package.json scripts
 "scripts": {
@@ -71,6 +71,7 @@ npx gql-gen <outputDir> <schemaPath> <withFragment> [namePostfix]
     - An HTTP/HTTPS endpoint URL
 - `withFragment`: `true` or `false` - whether to generate fragment files
 - `namePostfix`: (Optional) Suffix to add to generated operation names
+- `maxDepth`: (Optional) Maximum nesting depth for query generation (default: 5)
 
 ### Testing
 
@@ -184,6 +185,11 @@ gql-gen ./generated https://api.example.com/graphql false
 gql-gen ./generated ./schema.graphqls true "V2"
 ```
 
+### Generate with custom depth limit
+```bash
+gql-gen ./generated ./schema.graphqls false "" 3
+```
+
 ### Using in npm scripts
 ```json
 {
@@ -279,6 +285,12 @@ When multiple schema files are provided (via directory or glob pattern), the too
 
 ### Circular Reference Handling
 Set `withFragment` to `false` if your schema contains circular references to avoid infinite loops in generated queries.
+
+### Depth Control
+Control the maximum nesting depth of generated queries using the `maxDepth` parameter. This prevents excessively deep queries and improves performance:
+- Default depth: 5 levels
+- Prevents empty object generation when depth limit is reached
+- Useful for deeply nested schemas or performance optimization
 
 ### Custom Type Handling
 The tool intelligently handles:

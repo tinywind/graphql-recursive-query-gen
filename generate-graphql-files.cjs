@@ -142,18 +142,24 @@ async function main() {
     return result;
   };
 
-  const getReturnTypes = (TYPES, typeRef, paths) => {
+  const getReturnTypes = (TYPES, typeRef, typePath = []) => {
     const objectType = TYPES[typeRef];
-    const intents = repeatedIntent(paths.length + 2);
-    if (objectType) {
-      return objectType
-        .map(field => {
-          if (paths.find(path => path.name === field.name && path.ref === field.ref)) return '';
-          return `${intents}${field.name}` + (TYPES[field.ref] ? ` {\n${getReturnTypes(TYPES, field.ref, [...paths, { name: field.name, ref: field.ref }])}${intents}\n${intents}}` : '');
-        })
-        .join('\n');
-    }
-    return '';
+    if (!objectType) return '';
+    if (typePath.includes(typeRef)) return '';
+
+    const intents = repeatedIntent(typePath.length + 2);
+    return objectType
+      .map(field => {
+        if (!TYPES[field.ref]) return `${intents}${field.name}`;
+        if (typePath.includes(field.ref)) return `${intents}${field.name}`;
+        const newTypePath = [...typePath, typeRef];
+        const subFields = getReturnTypes(TYPES, field.ref, newTypePath);
+        return subFields
+          ? `${intents}${field.name} {\n${subFields}\n${intents}}`
+          : `${intents}${field.name}`;
+      })
+      .filter(field => field !== '')
+      .join('\n');
   };
 
   const generateGraphQLFile = schema => {
@@ -205,7 +211,7 @@ async function main() {
     const mergedDefinitions = [];
     const seenTypes = new Set();
     const seenOperations = new Map(); // Track Query/Mutation fields
-    
+
     schemas.forEach(schema => {
       try {
         const parsed = parse(schema);
@@ -250,12 +256,12 @@ async function main() {
         console.error(`Error parsing schema: ${error.message}`);
       }
     });
-    
+
     // Add merged Query/Mutation/Subscription types
     seenOperations.forEach(def => {
       mergedDefinitions.push(def);
     });
-    
+
     return {
       kind: 'Document',
       definitions: mergedDefinitions
@@ -265,7 +271,7 @@ async function main() {
   const generate = async (absoluteSchemaPathPattern) => {
     try {
       let schemaPaths = [];
-      
+
       // Check if it's a glob pattern (contains * or ?)
       if (absoluteSchemaPathPattern.includes('*') || absoluteSchemaPathPattern.includes('?')) {
         // Treat as glob pattern
@@ -286,31 +292,31 @@ async function main() {
           return;
         }
       }
-      
+
       if (schemaPaths.length === 0) {
         console.error('No GraphQL schema files found');
         return;
       }
-      
+
       console.log(`Found ${schemaPaths.length} schema file(s):`);
       schemaPaths.forEach(p => console.log(`  - ${p}`));
-      
+
       // Read all schema files
       const schemas = schemaPaths.map(schemaPath => {
         console.log(`Reading schema from: ${schemaPath}`);
         return fs.readFileSync(schemaPath, 'utf-8');
       });
-      
+
       // Merge schemas
       const mergedDocument = mergeSchemas(schemas);
-      
+
       // Print merged schema for debugging
       const { print } = require('graphql');
       const mergedSchema = print(mergedDocument);
-      
+
       // Generate GraphQL files from merged schema
       generateGraphQLFile(mergedSchema);
-      
+
       console.log('GraphQL files generated successfully!');
     } catch (error) {
       console.error('Error in generate function:', error);

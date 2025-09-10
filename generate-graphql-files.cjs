@@ -2,7 +2,6 @@
 async function main() {
   const fs = require('fs');
   const { parse } = require('graphql');
-  const { globby } = require('globby');
   const path = require('path');
   const { join } = require('path').posix;
   const fetch = (await import('node-fetch')).default;
@@ -281,6 +280,7 @@ async function main() {
 
   const generate = async (absoluteSchemaPathPattern) => {
     try {
+      const { globby } = await import('globby');
       let schemaPaths = [];
 
       // Check if it's a glob pattern (contains * or ?)

@@ -9,4 +9,5 @@ generated/
 coverage/
 .nyc_output/
 test-output/
-
+.claude/
+CLAUDE.md

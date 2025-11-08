@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2025-11-08
+
+### Fixed
+- Fixed path resolution to use `process.cwd()` instead of `__dirname` for correct working directory behavior
+- Added automatic detection and handling of absolute vs relative paths for both output and schema paths
+- Improved Windows path compatibility by normalizing backslashes to forward slashes for globby
+- Fixed TypeError when processing schema definitions without name property (schema blocks, directives)
+- Removed path.posix dependency for better cross-platform compatibility
+
+### Improved
+- Enhanced cross-platform path handling for Windows and Unix-like systems
+- Better error messages for path-related issues
+
 ## [1.0.3] - 2025-08-24
 
 ### Added

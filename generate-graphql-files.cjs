@@ -3,7 +3,6 @@ async function main() {
   const fs = require('fs');
   const { parse } = require('graphql');
   const path = require('path');
-  const { join } = require('path').posix;
   const fetch = (await import('node-fetch')).default;
 
   const downloadSchema = endpoint => {
@@ -172,7 +171,7 @@ async function main() {
     const definitions = parse(schema).definitions;
 
     definitions
-      .filter(def => !['Query', 'Mutation'].includes(def.name.value) && !['ScalarTypeDefinition', 'EnumTypeDefinition', 'InputObjectTypeDefinition'].includes(def.kind))
+      .filter(def => def.name && !['Query', 'Mutation'].includes(def.name.value) && !['ScalarTypeDefinition', 'EnumTypeDefinition', 'InputObjectTypeDefinition'].includes(def.kind))
       .forEach(def => {
         const fields = [];
         for (let i in def.fields) {
@@ -192,7 +191,7 @@ async function main() {
     }
 
     definitions
-      .filter(def => ['Query', 'Mutation'].includes(def.name.value))
+      .filter(def => def.name && ['Query', 'Mutation'].includes(def.name.value))
       .forEach(def => {
         def.fields.map(field => {
           const operationName = def.name.value;
@@ -283,17 +282,21 @@ async function main() {
       const { globby } = await import('globby');
       let schemaPaths = [];
 
+      // Normalize path for globby (use forward slashes)
+      const normalizedPath = absoluteSchemaPathPattern.replace(/\\/g, '/');
+
       // Check if it's a glob pattern (contains * or ?)
-      if (absoluteSchemaPathPattern.includes('*') || absoluteSchemaPathPattern.includes('?')) {
+      if (normalizedPath.includes('*') || normalizedPath.includes('?')) {
         // Treat as glob pattern
-        schemaPaths = await globby(absoluteSchemaPathPattern);
+        schemaPaths = await globby(normalizedPath);
       } else {
         // Check if it's a file or directory
         try {
           const stat = fs.statSync(absoluteSchemaPathPattern);
           if (stat.isDirectory()) {
             // If it's a directory, find all .graphqls files in it
-            schemaPaths = await globby(join(absoluteSchemaPathPattern, '**/*.graphqls'));
+            const globPattern = path.join(absoluteSchemaPathPattern, '**/*.graphqls').replace(/\\/g, '/');
+            schemaPaths = await globby(globPattern);
           } else if (stat.isFile() && absoluteSchemaPathPattern.endsWith('.graphqls')) {
             // If it's a single file
             schemaPaths = [absoluteSchemaPathPattern];
@@ -344,8 +347,17 @@ async function main() {
     process.exit(1);
   }
 
-  const outputDir = process.argv[2];
-  const schemaPath = process.argv[3];
+  const rawOutputDir = process.argv[2];
+  const rawSchemaPath = process.argv[3];
+
+  // Resolve paths: use absolute path as-is, resolve relative path from process.cwd()
+  const outputDir = path.isAbsolute(rawOutputDir)
+    ? rawOutputDir
+    : path.resolve(process.cwd(), rawOutputDir);
+  const schemaPath = path.isAbsolute(rawSchemaPath)
+    ? rawSchemaPath
+    : path.resolve(process.cwd(), rawSchemaPath);
+
   const withFragment = process.argv[4] === 'true'; // note: 순한 참조가 있다면, `false`로 설정해야 함
   const namePostfix = process.argv[5] || '';
   const maxDepth = parseInt(process.argv[6]) || 5;
@@ -358,13 +370,13 @@ async function main() {
     console.error('Error creating directory:', error);
   }
 
-  if (schemaPath.startsWith('https://') || schemaPath.startsWith('http://')) {
-    downloadSchema(schemaPath).then(async schemaFile => {
-      schemaFile = join(path.resolve(__dirname, schemaFile).split(path.sep).join('/'));
+  if (rawSchemaPath.startsWith('https://') || rawSchemaPath.startsWith('http://')) {
+    downloadSchema(rawSchemaPath).then(async schemaFile => {
+      // schemaFile is already an absolute path from downloadSchema
       await generate(schemaFile);
     });
   } else {
-    await generate(join(path.resolve(__dirname, schemaPath).split(path.sep).join('/')));
+    await generate(schemaPath);
   }
 }
 main().catch(error => console.error('An error occurred:', error));

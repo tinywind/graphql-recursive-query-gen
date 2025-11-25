@@ -1,6 +1,6 @@
 # graphql-recursive-query-gen
 
-A powerful CLI tool that automatically generates GraphQL query and mutation files from GraphQL schemas. It supports multiple schema sources including local files, directories, glob patterns, and remote endpoints.
+A powerful CLI tool that automatically generates GraphQL query, mutation, and subscription files from GraphQL schemas. It supports multiple schema sources including local files, directories, glob patterns, and remote endpoints.
 
 ## Table of Contents
 
@@ -17,7 +17,8 @@ A powerful CLI tool that automatically generates GraphQL query and mutation file
 
 ## Features
 
-- 🚀 Generate query/mutation files from GraphQL schemas
+- 🚀 Generate query/mutation/subscription files from GraphQL schemas
+- 📡 Full subscription type support
 - 📁 Support for multiple schema files (merge schemas)
 - 🌐 Download schemas from remote GraphQL endpoints
 - 🎯 Fragment generation support
@@ -112,6 +113,7 @@ test-output/                   # Generated test outputs
     - User management (CRUD operations)
     - Post management with comments
     - Social features (likes, followers)
+    - Real-time subscriptions (post created, comment added)
 
 2. **E-commerce Schema** (`examples/ecommerce-schema.graphqls`):
     - Product catalog with categories
@@ -217,15 +219,17 @@ exec('npx gql-gen ./output ./schema.graphqls true', (error, stdout, stderr) => {
 
 The tool generates the following files:
 
-### Query/Mutation Files
-For each query and mutation field in your schema, a separate GraphQL file is created:
+### Query/Mutation/Subscription Files
+For each query, mutation, and subscription field in your schema, a separate GraphQL file is created:
 
 ```
 generated/
 ├── GetUser-query.graphql
 ├── GetUsers-query.graphql
 ├── CreateUser-mutation.graphql
-└── UpdateUser-mutation.graphql
+├── UpdateUser-mutation.graphql
+├── PostCreated-subscription.graphql
+└── CommentAdded-subscription.graphql
 ```
 
 ### Fragment Files (when `withFragment` is `true`)
@@ -275,6 +279,25 @@ fragment UserV2Fragment on User {
   name
   email
   posts { ...PostV2Fragment }
+}
+```
+
+### Subscription File Example
+```graphql
+subscription PostCreated(
+  $userId: ID
+) {
+  postCreated(
+    userId: $userId
+  ) {
+    id
+    title
+    content
+    author {
+      id
+      username
+    }
+  }
 }
 ```
 

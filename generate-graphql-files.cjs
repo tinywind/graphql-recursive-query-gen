@@ -191,7 +191,7 @@ async function main() {
     }
 
     definitions
-      .filter(def => def.name && ['Query', 'Mutation'].includes(def.name.value))
+      .filter(def => def.name && ['Query', 'Mutation', 'Subscription'].includes(def.name.value))
       .forEach(def => {
         def.fields.map(field => {
           const operationName = def.name.value;

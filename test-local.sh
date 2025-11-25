@@ -131,6 +131,34 @@ if [ -f "test-output/fragments/User-fragment.graphql" ]; then
 else
   echo -e "${RED}✗ Fragment file not found${NC}"
 fi
+echo ""
+
+# Validate subscription files
+echo -e "${YELLOW}Validating subscription generation...${NC}"
+SUBSCRIPTION_PASSED=true
+
+for sub_file in "PostAdded-subscription.graphql" "CommentAdded-subscription.graphql" "UserStatusChanged-subscription.graphql"; do
+  if [ -f "test-output/multi-schema/$sub_file" ]; then
+    # Check if file starts with 'subscription'
+    if head -n 1 "test-output/multi-schema/$sub_file" | grep -q "^subscription"; then
+      echo -e "${GREEN}✓ $sub_file generated correctly${NC}"
+    else
+      echo -e "${RED}✗ $sub_file does not start with 'subscription'${NC}"
+      SUBSCRIPTION_PASSED=false
+    fi
+  else
+    echo -e "${RED}✗ $sub_file not found${NC}"
+    SUBSCRIPTION_PASSED=false
+  fi
+done
+
+if [ "$SUBSCRIPTION_PASSED" = true ]; then
+  echo -e "${GREEN}✓ All subscription files validated${NC}"
+  echo "Sample subscription content:"
+  cat test-output/multi-schema/PostAdded-subscription.graphql
+else
+  echo -e "${RED}✗ Subscription validation failed${NC}"
+fi
 
 echo ""
 echo -e "${GREEN}🎉 Local tests completed!${NC}"

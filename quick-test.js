@@ -22,6 +22,11 @@ type Mutation {
   createItem(name: String!): Item!
 }
 
+type Subscription {
+  itemCreated(userId: ID): Item!
+  itemUpdated(id: ID!): Item!
+}
+
 type Item {
   id: ID!
   name: String!
@@ -52,13 +57,47 @@ try {
     console.log(`  - ${file}`);
   });
 
-  // Show sample content
-  if (files.length > 0) {
-    console.log('\nSample generated content:');
-    console.log('─'.repeat(50));
-    const sampleFile = path.join(testDir, files[0]);
-    console.log(fs.readFileSync(sampleFile, 'utf-8'));
-    console.log('─'.repeat(50));
+  // Verify expected files exist
+  const expectedFiles = {
+    query: ['Hello-query.graphql', 'GetItem-query.graphql'],
+    mutation: ['CreateItem-mutation.graphql'],
+    subscription: ['ItemCreated-subscription.graphql', 'ItemUpdated-subscription.graphql']
+  };
+
+  console.log('\n📋 Verification:');
+  let allPassed = true;
+
+  Object.entries(expectedFiles).forEach(([type, fileList]) => {
+    console.log(`\n  ${type.toUpperCase()}:`);
+    fileList.forEach(expectedFile => {
+      const exists = files.includes(expectedFile);
+      console.log(`    ${exists ? '✓' : '✗'} ${expectedFile}`);
+      if (!exists) allPassed = false;
+    });
+  });
+
+  // Show subscription file contents
+  console.log('\n📄 Subscription file contents:');
+  expectedFiles.subscription.forEach(subFile => {
+    if (files.includes(subFile)) {
+      console.log(`\n  [${subFile}]`);
+      console.log('─'.repeat(50));
+      const content = fs.readFileSync(path.join(testDir, subFile), 'utf-8');
+      console.log(content);
+      console.log('─'.repeat(50));
+
+      // Verify content starts with 'subscription'
+      if (!content.trim().startsWith('subscription')) {
+        console.log('  ✗ ERROR: File should start with "subscription"');
+        allPassed = false;
+      } else {
+        console.log('  ✓ Content verified');
+      }
+    }
+  });
+
+  if (!allPassed) {
+    throw new Error('Some verification checks failed');
   }
 
   // Cleanup

@@ -17,6 +17,13 @@ type Mutation {
   addComment(postId: ID!, content: String!): Comment!
 }
 
+type Subscription {
+  postCreated(userId: ID): Post!
+  postUpdated(postId: ID!): Post!
+  commentAdded(postId: ID!): Comment!
+  userFollowed(userId: ID!): User!
+}
+
 type User {
   id: ID!
   username: String!

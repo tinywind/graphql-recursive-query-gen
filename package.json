@@ -33,7 +33,7 @@
   "license": "MIT",
   "dependencies": {
     "graphql": "^16.8.0",
-    "globby": "^14.1.0",
+    "globby": "^16.2.4",
     "node-fetch": "^3.3.2"
   },
   "engines": {

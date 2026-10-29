@@ -326,7 +326,7 @@ The tool intelligently handles:
 
 ## Requirements
 
-- Node.js >= 18.0.0
+- Node.js 22.x or >= 24.0.0
 - GraphQL schema in SDL format (`.graphqls` files)
 
 ## Dependencies

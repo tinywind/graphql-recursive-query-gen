@@ -1,39 +1,42 @@
 # graphql-recursive-query-gen
 
-A powerful CLI tool that automatically generates GraphQL query, mutation, and subscription files from GraphQL schemas. It supports multiple schema sources including local files, directories, glob patterns, and remote endpoints.
+Generate recursive GraphQL query, mutation, and subscription files from local schema files, directories, glob patterns, or remote endpoints.
 
-## Table of Contents
+## Contents
 
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Output Structure](#output-structure)
-- [Generated File Examples](#generated-file-examples)
-- [Testing](#testing)
-- [Advanced Features](#advanced-features)
+- [Examples](#examples)
+- [Output structure](#output-structure)
+- [Generated file examples](#generated-file-examples)
+- [Advanced features](#advanced-features)
 - [Requirements](#requirements)
+- [Dependencies](#dependencies)
+- [Testing](#testing)
 - [Contributing](#contributing)
 - [License](#license)
+- [Support](#support)
 
 ## Features
 
-- 🚀 Generate query/mutation/subscription files from GraphQL schemas
-- 📡 Full subscription type support
-- 📁 Support for multiple schema files (merge schemas)
-- 🌐 Download schemas from remote GraphQL endpoints
-- 🎯 Fragment generation support
-- 🔍 Glob pattern support for schema discovery
-- 📝 Customizable naming with postfix option
+- Generate query/mutation/subscription files from GraphQL schemas
+- Subscription type support
+- Support for multiple schema files (merge schemas)
+- Download schemas from remote GraphQL endpoints
+- Fragment generation support
+- Glob pattern support for schema discovery
+- Customizable naming with postfix option
 
 ## Installation
 
-### Global Installation
+### Global installation
 
 ```bash
 npm install -g graphql-recursive-query-gen
 ```
 
-### Local Installation
+### Local installation
 
 ```bash
 npm install graphql-recursive-query-gen
@@ -47,7 +50,7 @@ npx graphql-recursive-query-gen <outputDir> <schemaPath> <withFragment> [namePos
 
 ## Usage
 
-### Basic Command
+### Basic command
 
 ```bash
 # With global installation
@@ -73,92 +76,6 @@ npx gql-gen <outputDir> <schemaPath> <withFragment> [namePostfix] [maxDepth]
 - `withFragment`: `true` or `false` - whether to generate fragment files
 - `namePostfix`: (Optional) Suffix to add to generated operation names
 - `maxDepth`: (Optional) Maximum nesting depth for query generation (default: 5)
-
-### Testing
-
-### Local Testing
-
-The project includes a comprehensive test suite with sample schemas. To run the tests:
-
-```bash
-# Run all tests
-npm test
-
-# Or run specific tests
-npm run test:basic      # Test without fragments
-npm run test:fragments  # Test with fragments
-npm run test:postfix    # Test with custom postfix
-```
-
-### Test Structure
-
-```
-examples/
-├── sample-schema.graphqls     # Blog application schema
-├── ecommerce-schema.graphqls  # E-commerce schema with advanced features
-└── multi-schema/              # Multiple schema files for testing
-    ├── auth.graphqls         # Authentication extensions
-    └── subscription.graphqls # Subscription types
-
-test-output/                   # Generated test outputs
-├── basic/                     # Basic generation results
-├── fragments/                 # Fragment generation results
-├── postfix/                   # Custom postfix results
-└── multi-schema/             # Multi-schema merge results
-```
-
-### Sample Schemas
-
-1. **Blog Schema** (`examples/sample-schema.graphqls`):
-    - User management (CRUD operations)
-    - Post management with comments
-    - Social features (likes, followers)
-    - Real-time subscriptions (post created, comment added)
-
-2. **E-commerce Schema** (`examples/ecommerce-schema.graphqls`):
-    - Product catalog with categories
-    - Shopping cart operations
-    - Order management
-    - Advanced features: unions, interfaces, custom scalars, enums
-
-### Quick Test
-
-For a quick verification that everything is working:
-
-```bash
-# Make test scripts executable (first time only)
-chmod +x test-local.sh quick-test.js examples/run-example.sh
-
-# Run quick test
-node quick-test.js
-```
-
-This will create a simple schema, generate files, display the output, and clean up automatically.
-
-### Manual Testing
-
-1. **Run the example script:**
-   ```bash
-   cd examples
-   ./run-example.sh
-   ```
-
-2. **Test with sample schema:**
-   ```bash
-   node generate-graphql-files.cjs ./output examples/sample-schema.graphqls false
-   ```
-
-3. **Test with npm link:**
-   ```bash
-   npm link
-   gql-gen ./output examples/sample-schema.graphqls true
-   ```
-
-4. **Test with remote endpoint:**
-   ```bash
-   # Replace with your GraphQL endpoint
-   gql-gen ./output https://api.example.com/graphql false
-   ```
 
 ## Examples
 
@@ -196,7 +113,7 @@ gql-gen ./generated ./schema.graphqls false "" 3
 ```json
 {
   "scripts": {
-    "generate:graphql": "gql-gen ./src/graphql ./schemas/*.graphqls true",
+    "generate:graphql": "gql-gen ./src/graphql \"./schemas/*.graphqls\" true",
     "generate:graphql:prod": "gql-gen ./src/graphql https://api.production.com/graphql false PROD"
   }
 }
@@ -215,11 +132,11 @@ exec('npx gql-gen ./output ./schema.graphqls true', (error, stdout, stderr) => {
 });
 ```
 
-## Output Structure
+## Output structure
 
 The tool generates the following files:
 
-### Query/Mutation/Subscription Files
+### Query, mutation, and subscription files
 For each query, mutation, and subscription field in your schema, a separate GraphQL file is created:
 
 ```
@@ -232,7 +149,7 @@ generated/
 └── CommentAdded-subscription.graphql
 ```
 
-### Fragment Files (when `withFragment` is `true`)
+### Fragment files (when `withFragment` is `true`)
 For each type in your schema, a fragment file is created:
 
 ```
@@ -242,7 +159,7 @@ generated/
 └── Comment-fragment.graphql
 ```
 
-### Downloaded Schema (for remote endpoints)
+### Downloaded schema (for remote endpoints)
 When using a remote endpoint, the schema is downloaded and saved:
 
 ```
@@ -250,9 +167,9 @@ generated/
 └── schema.graphqls
 ```
 
-## Generated File Examples
+## Generated file examples
 
-### Query File Example
+### Query file example
 ```graphql
 query GetUserV2(
   $id: ID!
@@ -272,7 +189,7 @@ query GetUserV2(
 }
 ```
 
-### Fragment File Example
+### Fragment file example
 ```graphql
 fragment UserV2Fragment on User {
   id
@@ -282,7 +199,7 @@ fragment UserV2Fragment on User {
 }
 ```
 
-### Subscription File Example
+### Subscription file example
 ```graphql
 subscription PostCreated(
   $userId: ID
@@ -301,22 +218,19 @@ subscription PostCreated(
 }
 ```
 
-## Advanced Features
+## Advanced features
 
-### Schema Merging
+### Schema merging
 When multiple schema files are provided (via directory or glob pattern), the tool automatically merges them into a single schema before generation. This is useful for modular schema architectures.
 
-### Circular Reference Handling
-Set `withFragment` to `false` if your schema contains circular references to avoid infinite loops in generated queries.
+### Circular reference handling
+For schemas with circular references, set `withFragment` to `false`. Fragment mode writes references between fragment files and can produce cyclic fragment spreads that GraphQL rejects.
 
-### Depth Control
-Control the maximum nesting depth of generated queries using the `maxDepth` parameter. This prevents excessively deep queries and improves performance:
-- Default depth: 5 levels
-- Prevents empty object generation when depth limit is reached
-- Useful for deeply nested schemas or performance optimization
+### Depth control
+The `maxDepth` parameter limits nested selections when `withFragment` is `false`. It defaults to 5. The generator omits nested object fields when no selection remains at that depth. Fragment mode does not use this limit.
 
-### Custom Type Handling
-The tool intelligently handles:
+### Custom type handling
+Supported field and argument types:
 - Scalar types
 - Enum types
 - Input types
@@ -335,9 +249,94 @@ The tool intelligently handles:
 - `globby`: File system pattern matching
 - `node-fetch`: HTTP client for downloading remote schemas
 
+## Testing
+
+### Local testing
+
+From a source checkout, install dependencies and run the sample-schema checks:
+
+```bash
+npm install
+
+# Run all checks
+npm test
+
+# Or run specific tests
+npm run test:basic      # Test without fragments
+npm run test:fragments  # Test with fragments
+npm run test:postfix    # Test with custom postfix
+```
+
+### Test structure
+
+```
+examples/
+├── sample-schema.graphqls     # Blog application schema
+├── ecommerce-schema.graphqls  # E-commerce schema with advanced features
+└── multi-schema/              # Multiple schema files for testing
+    ├── auth.graphqls         # Authentication extensions
+    └── subscription.graphqls # Subscription types
+
+test-output/                   # Generated test outputs
+├── basic/                     # Basic generation results
+├── fragments/                 # Fragment generation results
+├── postfix/                   # Custom postfix results
+└── multi-schema/             # Multi-schema merge results
+```
+
+### Sample schemas
+
+1. **Blog Schema** (`examples/sample-schema.graphqls`):
+    - User management (CRUD operations)
+    - Post management with comments
+    - Social features (likes, followers)
+    - Real-time subscriptions (post created, comment added)
+
+2. **E-commerce Schema** (`examples/ecommerce-schema.graphqls`):
+    - Product catalog with categories
+    - Shopping cart operations
+    - Order management
+    - Advanced features: unions, interfaces, custom scalars, enums
+
+### Quick test
+
+Run the quick check:
+
+```bash
+# Run quick test
+node quick-test.js
+```
+
+This will create a simple schema, generate files, display the output, and clean up automatically.
+
+### Manual testing
+
+1. **Run the example script:**
+   ```bash
+   cd examples
+   ./run-example.sh
+   ```
+
+2. **Test with sample schema:**
+   ```bash
+   node generate-graphql-files.cjs ./output examples/sample-schema.graphqls false
+   ```
+
+3. **Test with npm link:**
+   ```bash
+   npm link
+   gql-gen ./output examples/sample-schema.graphqls true
+   ```
+
+4. **Test with remote endpoint:**
+   ```bash
+   # Replace with your GraphQL endpoint
+   gql-gen ./output https://api.example.com/graphql false
+   ```
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Open an issue to report a problem or propose a change, or submit a pull request.
 
 ## License
 
@@ -345,8 +344,4 @@ MIT
 
 ## Support
 
-If you encounter any issues or have questions, please file an issue on the [GitHub repository](https://github.com/tinywind/graphql-recursive-query-gen/issues).
-
-## Important Note
-
-Make sure to add the shebang line `#!/usr/bin/env node` at the beginning of `generate-graphql-files.cjs` file for the CLI to work properly.
+Report problems or ask questions in [GitHub issues](https://github.com/tinywind/graphql-recursive-query-gen/issues).
